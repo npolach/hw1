@@ -42,7 +42,7 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
 
-#define MAX_PARTICLES 1000
+#define MAX_PARTICLES 10000
 #define GRAVITY 0.15
 #define rnd() (float)rand() / (float)RAND_MAX
 
@@ -69,14 +69,12 @@ struct Particle {
 };
 
 struct Game {
-	// TODO: Create array of boxes so multiple boxes can be displayed on screen
-	Shape box;
-	// Create array of particles so multiple boxes can be displayed on screen
+	Shape box[5];
 	Particle particle[MAX_PARTICLES];
 	int n;
 	int bubbler;
 	int mouse[2];
-	Game() { n=0; bubbler=0; mouse[0]=0; mouse[1]=0; }
+	Game() { n=0; bubbler=1; mouse[0]=0; mouse[1]=0; }
 };
 
 //Function prototypes
@@ -87,6 +85,7 @@ void check_mouse(XEvent *e, Game *game);
 int check_keys(XEvent *e, Game *game);
 void movement(Game *game);
 void render(Game *game);
+void makeBoxes(Game *game);
 
 
 int main(void)
@@ -99,11 +98,8 @@ int main(void)
 	Game game;
 	game.n=0;
 
-	//declare a box shape
-	game.box.width = 100;
-	game.box.height = 10;
-	game.box.center.x = 120 + 5*65;
-	game.box.center.y = 500 - 5*60;
+	// set up boxes
+	makeBoxes(&game);
 
 	//start animation
 	while (!done) {
@@ -177,7 +173,42 @@ void init_opengl(void)
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 }
 
-// TODO: Change so that it adds new particles to particle array
+void makeBoxes (Game *game)
+{
+	// Requirements box
+	game->box[0].width = 100;
+	game->box[0].height = 10;
+	game->box[0].center.x = 150;
+	game->box[0].center.y = 550;
+
+	// Design box
+	game->box[1].width = 100;
+	game->box[1].height = 10;
+	game->box[1].center.x = 250;
+	game->box[1].center.y = 500;
+
+	// Coding box
+	game->box[2].width = 100;
+	game->box[2].height = 10;
+	game->box[2].center.x = 350;
+	game->box[2].center.y = 450;
+
+	// Testing box
+	game->box[3].width = 100;
+	game->box[3].height = 10;
+	game->box[3].center.x = 450;
+	game->box[3].center.y = 400;
+
+	// Maintenance box
+	game->box[4].width = 100;
+	game->box[4].height = 10;
+	game->box[4].center.x = 550;
+	game->box[4].center.y = 350;
+
+
+}
+
+// TODO: Edit to make particles appear more like a fluid and have more randomness
 void makeParticle(Game *game, int x, int y)
 {
 	if (game->n >= MAX_PARTICLES)
@@ -263,8 +294,12 @@ void movement(Game *game)
 
 	if (game->bubbler != 0) {
 		// the bubbler is on!
-		makeParticle(game, game->mouse[0], game->mouse[1]);
-		//makeParticle(game,WINDOW_WIDTH/2, WINDOW_HEIGHT/2);
+		for (int i = 0; i < 5; i++) {
+			// start bubbler above boxes
+			makeParticle(game, 150, 590);
+			// start bubbler at mouse
+			//makeParticle(game, game->mouse[0], game->mouse[1]);
+		}
 	}
 
 	for (int i=0; i < game->n; i++) {
@@ -275,16 +310,17 @@ void movement(Game *game)
 
 		//check for collision with shapes...
 		Shape *s;
-		s = &game->box;
-
-		// TODO: Check for bottom collision
-		if (p->s.center.y < s->center.y + s->height &&
-				p->s.center.x >= s->center.x - s->width &&
-				p->s.center.x <= s->center.x + s->width) {
-			// TODO: Edit below line so paticle does not enter the box
-			p->s.center.y = s->center.y + s->height;
-			p->velocity.y = -p->velocity.y * 0.8f;
-			p->velocity.x += 0.05f;
+		for (int i=0; i < 5; i++) {
+			s = &game->box[i];
+			if (p->s.center.y < s->center.y + s->height && // top collision
+					p->s.center.y > s->center.y - s->height && // bottom collision
+					p->s.center.x >= s->center.x - s->width && // left collision
+					p->s.center.x <= s->center.x + s->width) { // right collision
+				p->s.center.y = s->center.y + s->height;
+				//p->velocity.y = -p->velocity.y * 0.8f;
+				p->velocity.y = -p->velocity.y * 0.025f;
+				p->velocity.x += 0.02f;
+			}
 		}
 
 		//check for off-screen
@@ -302,22 +338,24 @@ void render(Game *game)
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draw shapes...
 
-	//draw box
 	Shape *s;
-	// TODO: For fun, randomize color slightly
-	glColor3ub(90,140,90);
-	s = &game->box;
-	glPushMatrix();
-	glTranslatef(s->center.x, s->center.y, s->center.z);
-	w = s->width;
-	h = s->height;
-	glBegin(GL_QUADS);
-	glVertex2i(-w,-h);
-	glVertex2i(-w, h);
-	glVertex2i( w, h);
-	glVertex2i( w,-h);
-	glEnd();
-	glPopMatrix();
+	//draw box
+	for (int i=0; i < 5; i++) {
+		// TODO: For fun, randomize color slightly
+		glColor3ub(90,140,90);
+		s = &game->box[i];
+		glPushMatrix();
+		glTranslatef(s->center.x, s->center.y, s->center.z);
+		w = s->width;
+		h = s->height;
+		glBegin(GL_QUADS);
+		glVertex2i(-w,-h);
+		glVertex2i(-w, h);
+		glVertex2i( w, h);
+		glVertex2i( w,-h);
+		glEnd();
+		glPopMatrix();
+	}
 
 	//draw all particles here
 	for (int i=0; i < game->n; i++) {
