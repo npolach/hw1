@@ -70,6 +70,7 @@ struct Particle {
 
 struct Game {
 	Shape box[5];
+	Shape circle;
 	Particle particle[MAX_PARTICLES];
 	int n;
 	int bubbler;
@@ -205,10 +206,11 @@ void makeBoxes (Game *game)
 	game->box[4].center.x = 550;
 	game->box[4].center.y = 350;
 
-
+	game->circle.radius = 50;
+	game->circle.center.x = 600;
+	game->circle.center.y = 450;
 }
 
-// TODO: Edit to make particles appear more like a fluid and have more randomness
 void makeParticle(Game *game, int x, int y)
 {
 	if (game->n >= MAX_PARTICLES)
@@ -356,6 +358,22 @@ void render(Game *game)
 		glEnd();
 		glPopMatrix();
 	}
+
+	// draw circle
+	// add code here
+	Shape *c = &game->circle;
+	int triangleAmount = 50;	
+	
+	GLfloat twicePi = 2.0f * 3.14; // PI
+
+	glBegin(GL_TRIANGLE_FAN);
+	glVertex2f(c->center.x, c->center.y);
+	for (int i = 0; i<= triangleAmount; i++) {
+	    glVertex2f(
+		    c->center.x + (c->radius * cos(i * twicePi / triangleAmount)),
+		    c->center.y + (c->radius * sin(i * twicePi / triangleAmount)));
+	}
+	glEnd();
 
 	//draw all particles here
 	for (int i=0; i < game->n; i++) {
