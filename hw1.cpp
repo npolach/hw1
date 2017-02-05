@@ -405,6 +405,7 @@ void render(Game *game)
 	//draw all particles here
 	for (int i=0; i < game->n; i++) {
 		glPushMatrix();
+		//glColor3ub(150,160, 200 + (rnd() * 100 - 50));
 		glColor3ub(150,160,220);
 		Vec *c = &game->particle[i].s.center;
 		w = 2;
@@ -423,23 +424,23 @@ void render(Game *game)
 	r.bot = WINDOW_HEIGHT - 60;
 	r.left = 100;
 	r.center = 0;
-	ggprint16(&r, 0, 0, "Requirements");
+	ggprint16(&r, 20, 0, "Requirements");
 
-	r.bot = WINDOW_HEIGHT - 120;
+	r.bot = WINDOW_HEIGHT - 160;
 	r.left = 200;
-	ggprint16(&r, 0, 0, "Design");
+	ggprint16(&r, 20, 0, "Design");
 
-	r.bot = WINDOW_HEIGHT - 180;
+	r.bot = WINDOW_HEIGHT - 260;
 	r.left = 300;
-	ggprint16(&r, 0, 0, "Implementation");
+	ggprint16(&r, 20, 0, "Implementation");
 
-	r.bot = WINDOW_HEIGHT - 240;
+	r.bot = WINDOW_HEIGHT - 360;
 	r.left = 400;
-	ggprint16(&r, 0, 0, "Testing");
+	ggprint16(&r, 20, 0, "Testing");
 
-	r.bot = WINDOW_HEIGHT - 300;
+	r.bot = WINDOW_HEIGHT - 460;
 	r.left = 500;
-	ggprint16(&r, 0, 0, "Release");
+	ggprint16(&r, 20, 0, "Release");
 }
 
 
