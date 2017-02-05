@@ -38,6 +38,7 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h"
 
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
@@ -115,6 +116,7 @@ int main(void)
 		glXSwapBuffers(dpy, win);
 	}
 	cleanupXWindows();
+	cleanup_fonts();
 	return 0;
 }
 
@@ -172,6 +174,7 @@ void init_opengl(void)
 	glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	initialize_fonts();
 }
 
 void makeBoxes (Game *game)
@@ -180,35 +183,40 @@ void makeBoxes (Game *game)
 	game->box[0].width = 100;
 	game->box[0].height = 10;
 	game->box[0].center.x = 150;
+	//game->box[0].center.y = 550;
 	game->box[0].center.y = 550;
 
 	// Design box
 	game->box[1].width = 100;
 	game->box[1].height = 10;
 	game->box[1].center.x = 250;
-	game->box[1].center.y = 500;
+	//game->box[1].center.y = 500;
+	game->box[1].center.y = 450;
 
 	// Coding box
 	game->box[2].width = 100;
 	game->box[2].height = 10;
 	game->box[2].center.x = 350;
-	game->box[2].center.y = 450;
+	//game->box[2].center.y = 450;
+	game->box[2].center.y = 350;
 
 	// Testing box
 	game->box[3].width = 100;
 	game->box[3].height = 10;
 	game->box[3].center.x = 450;
-	game->box[3].center.y = 400;
+	//game->box[3].center.y = 400;
+	game->box[3].center.y = 250;
 
 	// Maintenance box
 	game->box[4].width = 100;
 	game->box[4].height = 10;
 	game->box[4].center.x = 550;
-	game->box[4].center.y = 350;
+	//game->box[4].center.y = 350;
+	game->box[4].center.y = 150;
 
-	game->circle.radius = 50;
-	game->circle.center.x = 600;
-	game->circle.center.y = 450;
+	game->circle.radius = 100;
+	game->circle.center.x = 800;
+	game->circle.center.y = 0;
 }
 
 void makeParticle(Game *game, int x, int y)
@@ -310,7 +318,7 @@ void movement(Game *game)
 		p->s.center.x += p->velocity.x;
 		p->s.center.y += p->velocity.y;
 
-		//check for collision with shapes...
+		//check for collision with boxes...
 		Shape *s;
 		for (int i=0; i < 5; i++) {
 			s = &game->box[i];
@@ -323,6 +331,26 @@ void movement(Game *game)
 				p->velocity.y = -p->velocity.y * 0.025f;
 				p->velocity.x += 0.02f;
 			}
+		}
+
+		//check for collision with circle...
+		s = &game->circle;
+		float dist;
+		float xdiff, ydiff;
+		float xnorm, ynorm;
+		xdiff = p->s.center.x - s->center.x;
+		ydiff = p->s.center.y - s->center.y;
+		dist = sqrt((xdiff * xdiff) + (ydiff * ydiff)); 
+		xnorm = xdiff / dist;
+		ynorm = ydiff / dist;
+		if (dist < s->radius) {
+			// Move to edge of circle
+			p->s.center.x += (xnorm * s->radius);
+			p->s.center.y += (ynorm * s->radius);
+			p->s.center.y = ynorm;
+			// Add vector value to velocity
+			p->velocity.x += xnorm;
+			p->velocity.y += ynorm;
 		}
 
 		//check for off-screen
@@ -359,8 +387,7 @@ void render(Game *game)
 		glPopMatrix();
 	}
 
-	// draw circle
-	// add code here
+	//draw circle
 	Shape *c = &game->circle;
 	int triangleAmount = 50;	
 	
@@ -390,6 +417,29 @@ void render(Game *game)
 		glEnd();
 		glPopMatrix();
 	}
+
+	//draw all text here
+	Rect r;
+	r.bot = WINDOW_HEIGHT - 60;
+	r.left = 100;
+	r.center = 0;
+	ggprint16(&r, 0, 0, "Requirements");
+
+	r.bot = WINDOW_HEIGHT - 120;
+	r.left = 200;
+	ggprint16(&r, 0, 0, "Design");
+
+	r.bot = WINDOW_HEIGHT - 180;
+	r.left = 300;
+	ggprint16(&r, 0, 0, "Implementation");
+
+	r.bot = WINDOW_HEIGHT - 240;
+	r.left = 400;
+	ggprint16(&r, 0, 0, "Testing");
+
+	r.bot = WINDOW_HEIGHT - 300;
+	r.left = 500;
+	ggprint16(&r, 0, 0, "Release");
 }
 
 
