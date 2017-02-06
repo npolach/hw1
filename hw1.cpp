@@ -215,7 +215,7 @@ void makeBoxes (Game *game)
 	game->box[4].center.y = 150;
 
 	// Circle
-	game->circle.radius = 100;
+	game->circle.radius = 125;
 	game->circle.center.x = 800;
 	game->circle.center.y = 0;
 }
@@ -224,7 +224,7 @@ void makeParticle(Game *game, int x, int y)
 {
 	if (game->n >= MAX_PARTICLES)
 		return;
-	std::cout << "makeParticle() " << x << " " << y << std::endl;
+	//std::cout << "makeParticle() " << x << " " << y << std::endl;
 	//position of particle
 	Particle *p = &game->particle[game->n];
 	p->s.center.x = x;
@@ -337,23 +337,24 @@ void movement(Game *game)
 		//check for collision with circle...
 		s = &game->circle;
 		float dist;
-		float d1, d2;
-		//float xnorm, ynorm;
-		d1 = p->s.center.x - s->center.x;
-		d2 = p->s.center.y - s->center.y;
-		dist = sqrt((d1 * d1) + (d2 * d2)); 
-		//xnorm = d1 / dist;
-		//ynorm = d2 / dist;
+		float xdiff, ydiff;
+		float xnorm, ynorm;
+		xdiff = p->s.center.x - s->center.x;
+		ydiff = p->s.center.y - s->center.y;
+		dist = sqrt((xdiff * xdiff) + (ydiff * ydiff)); 
+		xnorm = xdiff / dist;
+		ynorm = ydiff / dist;
 		if (dist <= s->radius) {
+			std::cout << "Inside Circle" << std::endl;
 			// Move to edge of circle
 			//p->s.center.x += (xnorm * s->radius);
 			//p->s.center.y += (ynorm * s->radius);
-			p->s.center.x += s->center.x + (d1/dist)*s->radius;
-			p->s.center.y += s->center.y + (d2/dist)*s->radius;
+			p->s.center.x += s->center.x + xnorm * s->radius;
+			p->s.center.y += s->center.y + ynorm * s->radius;
 			
 			// Add vector value to velocity
-			p->velocity.x += (d1/dist)*2;
-			p->velocity.y += (d2/dist)*2;
+			p->velocity.x += xnorm * 2;
+			p->velocity.y += ynorm * 2;
 			//p->velocity.x += xnorm / dist;
 			//p->velocity.y += ynorm / dist;
 
@@ -373,7 +374,6 @@ void render(Game *game)
 	float w, h;
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draw shapes...
-
 	Shape *s;
 	//draw box
 	for (int i=0; i < 5; i++) {
@@ -395,8 +395,9 @@ void render(Game *game)
 	//draw circle
 	Shape *c = &game->circle;
 	int triangleAmount = 50;	
-	
-	GLfloat twicePi = 2.0f * 3.14; // PI
+
+	double pi = 3.1415926535897;
+	GLfloat twicePi = 2.0f * pi;
 
 	glBegin(GL_TRIANGLE_FAN);
 	glVertex2f(c->center.x, c->center.y);
@@ -405,24 +406,12 @@ void render(Game *game)
 		    c->center.x + (c->radius * cos(i * twicePi / triangleAmount)),
 		    c->center.y + (c->radius * sin(i * twicePi / triangleAmount)));
 	}
-	glEnd();
+        glEnd();
+	glPopMatrix();
 
-	//draw all particles here
-	for (int i=0; i < game->n; i++) {
-		glPushMatrix();
-		glColor3ub(150,160,220);
-		Vec *c = &game->particle[i].s.center;
-		w = 2;
-		h = 2;
-		glBegin(GL_QUADS);
-		glVertex2i(c->x-w, c->y-h);
-		glVertex2i(c->x-w, c->y+h);
-		glVertex2i(c->x+w, c->y+h);
-		glVertex2i(c->x+w, c->y-h);
-		glEnd();
-		glPopMatrix();
-	}
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glColor3ub(40,90,90);
 	//draw all text here
 	Rect r;
@@ -446,6 +435,23 @@ void render(Game *game)
 	r.bot = WINDOW_HEIGHT - 460;
 	r.left = 500;
 	ggprint16(&r, 20, 0, "Release");
+
+
+	//draw all particles here
+	for (int i=0; i < game->n; i++) {
+		glPushMatrix();
+		glColor3ub(150,160,220);
+		Vec *c = &game->particle[i].s.center;
+		w = 2;
+		h = 2;
+		glBegin(GL_QUADS);
+		glVertex2i(c->x-w, c->y-h);
+		glVertex2i(c->x-w, c->y+h);
+		glVertex2i(c->x+w, c->y+h);
+		glVertex2i(c->x+w, c->y-h);
+		glEnd();
+		glPopMatrix();
+	}
 }
 
 

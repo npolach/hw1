@@ -1,6 +1,6 @@
 # cs335 hw1
 # to compile your project, type make and press enter
-# ##LIB	= ./libggfonts.so
+##LIB	= ./libggfonts.so
 
 all: hw1
 
