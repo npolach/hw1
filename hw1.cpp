@@ -43,6 +43,7 @@
 #define WINDOW_WIDTH  800
 #define WINDOW_HEIGHT 600
 
+//#define MAX_PARTICLES 1 // For debugging
 #define MAX_PARTICLES 10000
 #define GRAVITY 0.15
 #define rnd() (float)rand() / (float)RAND_MAX
@@ -224,7 +225,7 @@ void makeParticle(Game *game, int x, int y)
 {
 	if (game->n >= MAX_PARTICLES)
 		return;
-	//std::cout << "makeParticle() " << x << " " << y << std::endl;
+	std::cout << "makeParticle() " << x << " " << y << std::endl;
 	//position of particle
 	Particle *p = &game->particle[game->n];
 	p->s.center.x = x;
@@ -345,19 +346,13 @@ void movement(Game *game)
 		xnorm = xdiff / dist;
 		ynorm = ydiff / dist;
 		if (dist <= s->radius) {
-			std::cout << "Inside Circle" << std::endl;
 			// Move to edge of circle
-			//p->s.center.x += (xnorm * s->radius);
-			//p->s.center.y += (ynorm * s->radius);
-			p->s.center.x += s->center.x + xnorm * s->radius;
-			p->s.center.y += s->center.y + ynorm * s->radius;
+			p->s.center.x = s->center.x + (xnorm * s->radius);
+			p->s.center.y = s->center.y + (ynorm * s->radius);
 			
 			// Add vector value to velocity
-			p->velocity.x += xnorm * 2;
-			p->velocity.y += ynorm * 2;
-			//p->velocity.x += xnorm / dist;
-			//p->velocity.y += ynorm / dist;
-
+			p->velocity.x += xnorm;
+			p->velocity.y += ynorm;
 		}
 
 		//check for off-screen
