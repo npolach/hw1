@@ -214,6 +214,7 @@ void makeBoxes (Game *game)
 	//game->box[4].center.y = 350;
 	game->box[4].center.y = 150;
 
+	// Circle
 	game->circle.radius = 100;
 	game->circle.center.x = 800;
 	game->circle.center.y = 0;
@@ -336,21 +337,26 @@ void movement(Game *game)
 		//check for collision with circle...
 		s = &game->circle;
 		float dist;
-		float xdiff, ydiff;
-		float xnorm, ynorm;
-		xdiff = p->s.center.x - s->center.x;
-		ydiff = p->s.center.y - s->center.y;
-		dist = sqrt((xdiff * xdiff) + (ydiff * ydiff)); 
-		xnorm = xdiff / dist;
-		ynorm = ydiff / dist;
-		if (dist < s->radius) {
+		float d1, d2;
+		//float xnorm, ynorm;
+		d1 = p->s.center.x - s->center.x;
+		d2 = p->s.center.y - s->center.y;
+		dist = sqrt((d1 * d1) + (d2 * d2)); 
+		//xnorm = d1 / dist;
+		//ynorm = d2 / dist;
+		if (dist <= s->radius) {
 			// Move to edge of circle
-			p->s.center.x += (xnorm * s->radius);
-			p->s.center.y += (ynorm * s->radius);
-			p->s.center.y = ynorm;
+			//p->s.center.x += (xnorm * s->radius);
+			//p->s.center.y += (ynorm * s->radius);
+			p->s.center.x += s->center.x + (d1/dist)*s->radius;
+			p->s.center.y += s->center.y + (d2/dist)*s->radius;
+			
 			// Add vector value to velocity
-			p->velocity.x += xnorm;
-			p->velocity.y += ynorm;
+			p->velocity.x += (d1/dist)*2;
+			p->velocity.y += (d2/dist)*2;
+			//p->velocity.x += xnorm / dist;
+			//p->velocity.y += ynorm / dist;
+
 		}
 
 		//check for off-screen
@@ -371,7 +377,6 @@ void render(Game *game)
 	Shape *s;
 	//draw box
 	for (int i=0; i < 5; i++) {
-		// TODO: For fun, randomize color slightly
 		glColor3ub(90,140,90);
 		s = &game->box[i];
 		glPushMatrix();
@@ -405,7 +410,6 @@ void render(Game *game)
 	//draw all particles here
 	for (int i=0; i < game->n; i++) {
 		glPushMatrix();
-		//glColor3ub(150,160, 200 + (rnd() * 100 - 50));
 		glColor3ub(150,160,220);
 		Vec *c = &game->particle[i].s.center;
 		w = 2;
@@ -419,6 +423,7 @@ void render(Game *game)
 		glPopMatrix();
 	}
 
+	glColor3ub(40,90,90);
 	//draw all text here
 	Rect r;
 	r.bot = WINDOW_HEIGHT - 60;
